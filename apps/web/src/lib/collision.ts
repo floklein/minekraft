@@ -206,7 +206,10 @@ export class CollisionSystem {
 
     // Check cache first
     if (this.groundHeightCache.has(key)) {
-      return this.groundHeightCache.get(key)!;
+      const cachedHeight = this.groundHeightCache.get(key);
+      if (cachedHeight !== undefined) {
+        return cachedHeight;
+      }
     }
 
     // Start from terrain height and work up to find the highest solid block

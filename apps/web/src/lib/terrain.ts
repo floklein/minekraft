@@ -28,7 +28,10 @@ export class TerrainGenerator {
 
     // Check cache first
     if (this.chunkCache.has(key)) {
-      return this.chunkCache.get(key)!;
+      const cachedChunk = this.chunkCache.get(key);
+      if (cachedChunk !== undefined) {
+        return cachedChunk;
+      }
     }
 
     const blocks: Block[][][] = [];

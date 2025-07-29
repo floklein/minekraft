@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { BlockType, getBlockColor } from "@/lib/blocks";
+import { getBlockColor } from "@/lib/blocks";
 import { useTerrain } from "./TerrainContext";
 
 interface TerrainProps {

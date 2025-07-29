@@ -1,20 +1,5 @@
 // Simple noise implementation for terrain generation
 export class SimplexNoise {
-  private grad3 = [
-    [1, 1, 0],
-    [-1, 1, 0],
-    [1, -1, 0],
-    [-1, -1, 0],
-    [1, 0, 1],
-    [-1, 0, 1],
-    [1, 0, -1],
-    [-1, 0, -1],
-    [0, 1, 1],
-    [0, -1, 1],
-    [0, 1, -1],
-    [0, -1, -1],
-  ];
-
   private p = [
     151, 160, 137, 91, 90, 15, 131, 13, 201, 95, 96, 53, 194, 233, 7, 225, 140,
     36, 103, 30, 69, 142, 8, 99, 37, 240, 21, 10, 23, 190, 6, 148, 247, 120,
@@ -41,18 +26,21 @@ export class SimplexNoise {
     this.seed(seed);
   }
 
-  private seed(seed: number) {
-    if (seed > 0 && seed < 1) {
-      seed *= 65536;
+  private seed(seedValue: number) {
+    let normalizedSeed = seedValue;
+    if (normalizedSeed > 0 && normalizedSeed < 1) {
+      normalizedSeed *= 65536;
     }
-    seed = Math.floor(seed);
-    if (seed < 256) {
-      seed |= seed << 8;
+    normalizedSeed = Math.floor(normalizedSeed);
+    if (normalizedSeed < 256) {
+      normalizedSeed |= normalizedSeed << 8;
     }
 
     for (let i = 0; i < 256; i++) {
       const v =
-        i & 1 ? this.p[i] ^ (seed & 255) : this.p[i] ^ ((seed >> 8) & 255);
+        i & 1
+          ? this.p[i] ^ (normalizedSeed & 255)
+          : this.p[i] ^ ((normalizedSeed >> 8) & 255);
       this.perm[i] = this.perm[i + 256] = v;
     }
   }
@@ -77,13 +65,13 @@ export class SimplexNoise {
     const Y = Math.floor(y) & 255;
     const Z = Math.floor(z) & 255;
 
-    x -= Math.floor(x);
-    y -= Math.floor(y);
-    z -= Math.floor(z);
+    const xf = x - Math.floor(x);
+    const yf = y - Math.floor(y);
+    const zf = z - Math.floor(z);
 
-    const u = this.fade(x);
-    const v = this.fade(y);
-    const w = this.fade(z);
+    const u = this.fade(xf);
+    const v = this.fade(yf);
+    const w = this.fade(zf);
 
     const A = this.perm[X] + Y;
     const AA = this.perm[A] + Z;
@@ -95,26 +83,26 @@ export class SimplexNoise {
     return this.lerp(
       this.lerp(
         this.lerp(
-          this.grad(this.perm[AA], x, y, z),
-          this.grad(this.perm[BA], x - 1, y, z),
+          this.grad(this.perm[AA], xf, yf, zf),
+          this.grad(this.perm[BA], xf - 1, yf, zf),
           u,
         ),
         this.lerp(
-          this.grad(this.perm[AB], x, y - 1, z),
-          this.grad(this.perm[BB], x - 1, y - 1, z),
+          this.grad(this.perm[AB], xf, yf - 1, zf),
+          this.grad(this.perm[BB], xf - 1, yf - 1, zf),
           u,
         ),
         v,
       ),
       this.lerp(
         this.lerp(
-          this.grad(this.perm[AA + 1], x, y, z - 1),
-          this.grad(this.perm[BA + 1], x - 1, y, z - 1),
+          this.grad(this.perm[AA + 1], xf, yf, zf - 1),
+          this.grad(this.perm[BA + 1], xf - 1, yf, zf - 1),
           u,
         ),
         this.lerp(
-          this.grad(this.perm[AB + 1], x, y - 1, z - 1),
-          this.grad(this.perm[BB + 1], x - 1, y - 1, z - 1),
+          this.grad(this.perm[AB + 1], xf, yf - 1, zf - 1),
+          this.grad(this.perm[BB + 1], xf - 1, yf - 1, zf - 1),
           u,
         ),
         v,
