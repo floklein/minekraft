@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { getBlockColor } from "@/lib/blocks";
+import { createBlockMaterial } from "@/lib/blocks";
 import { useTerrain } from "./TerrainContext";
 
 interface TerrainProps {
@@ -25,7 +25,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           receiveShadow={false}
         >
           <boxGeometry args={[1, 1, 1]} />
-          <meshLambertMaterial color={getBlockColor(block.type)} />
+          <primitive object={createBlockMaterial(block.type)} />
         </mesh>
       ))}
     </group>
