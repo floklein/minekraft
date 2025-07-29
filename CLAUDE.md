@@ -66,10 +66,11 @@ The web application includes a Minecraft clone built with React Three Fiber:
 
 ### Game Features
 - **Terrain Generation**: Procedural terrain using simplex noise
-- **Block System**: Grass, dirt, and stone blocks with instanced rendering
+- **Block System**: Grass, dirt, and stone blocks with textured rendering using PNG assets
 - **First-Person Controls**: WASD movement, mouse look, jumping
 - **Physics**: Basic gravity and ground collision
 - **Performance**: Instanced block rendering for efficiency
+- **Textures**: Block textures loaded from `src/assets/` (default_grass.png, default_dirt.png, default_stone.png)
 
 ### Game Routes
 - `/` - Home page with game link
@@ -80,3 +81,10 @@ The web application includes a Minecraft clone built with React Three Fiber:
 - Terrain generates in 16x16 chunks with 3x3 chunk render distance
 - Uses noise-based height generation for realistic terrain
 - Blocks are culled when completely surrounded (performance optimization)
+
+### Block System Implementation
+- **Core Logic**: `src/lib/blocks.ts` - Block types, texture loading, and material creation
+- **Rendering**: `src/components/game/Terrain.tsx` - Individual mesh rendering per block
+- **Texture System**: Uses Three.js TextureLoader with NearestFilter for pixelated appearance
+- **Material Creation**: `createBlockMaterial()` function creates MeshLambertMaterial with texture maps
+- **Texture Caching**: Textures are cached in a Map to avoid redundant loading
