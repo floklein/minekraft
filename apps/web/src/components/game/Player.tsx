@@ -122,30 +122,16 @@ export default function Player() {
     }
 
     // Check if on ground
-    const wasGrounded = isGroundedRef.current;
     isGroundedRef.current = collision.isOnGround(
       playerPosition.x,
       playerPosition.y,
       playerPosition.z,
     );
 
-    // Debug logging for ground detection
-    if (wasGrounded !== isGroundedRef.current) {
-      console.log(
-        `Ground state changed: ${wasGrounded} -> ${isGroundedRef.current} at position:`,
-        playerPosition.x.toFixed(2),
-        playerPosition.y.toFixed(2),
-        playerPosition.z.toFixed(2),
-      );
-    }
-
     // Jump
     if (keysRef.current.space && isGroundedRef.current) {
-      console.log("JUMPING! velocity.y =", JUMP_FORCE);
       velocity.y = JUMP_FORCE;
       keysRef.current.space = false;
-    } else if (keysRef.current.space && !isGroundedRef.current) {
-      console.log("Cannot jump - not grounded");
     }
 
     // Apply gravity (always apply, collision system will handle stopping at ground)

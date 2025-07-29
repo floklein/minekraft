@@ -16,7 +16,15 @@ export const PLAYER_HEIGHT = 1.8; // Player height (Y)
 export const PLAYER_EYE_HEIGHT = 1.62; // Eye height from feet
 
 export class CollisionSystem {
+  private groundHeightCache = new Map<string, number>();
+  private maxCacheSize = 200;
+
   constructor(private terrain: TerrainGenerator) {}
+
+  private getPositionKey(x: number, z: number): string {
+    // Round to nearest integer for caching
+    return `${Math.floor(x)},${Math.floor(z)}`;
+  }
 
   // Create player AABB at given position
   createPlayerAABB(x: number, y: number, z: number): AABB {
@@ -194,18 +202,36 @@ export class CollisionSystem {
 
   // Get ground height at position
   getGroundHeight(x: number, z: number): number {
+    const key = this.getPositionKey(x, z);
+
+    // Check cache first
+    if (this.groundHeightCache.has(key)) {
+      return this.groundHeightCache.get(key)!;
+    }
+
     // Start from terrain height and work up to find the highest solid block
     const terrainHeight = this.terrain.getTerrainHeight(
       Math.floor(x),
       Math.floor(z),
     );
 
+    let groundHeight = terrainHeight + 1;
     for (let y = terrainHeight + 10; y >= 0; y--) {
       if (this.terrain.isBlockSolidAt(Math.floor(x), y, Math.floor(z))) {
-        return y + 1; // Return top of the block
+        groundHeight = y + 1; // Return top of the block
+        break;
       }
     }
 
-    return terrainHeight + 1; // Fallback to terrain height
+    // Cache the result with LRU eviction
+    if (this.groundHeightCache.size >= this.maxCacheSize) {
+      const firstKey = this.groundHeightCache.keys().next().value;
+      if (firstKey) {
+        this.groundHeightCache.delete(firstKey);
+      }
+    }
+
+    this.groundHeightCache.set(key, groundHeight);
+    return groundHeight;
   }
 }

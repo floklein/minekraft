@@ -9,15 +9,28 @@ export interface Chunk {
 
 export class TerrainGenerator {
   private noise: SimplexNoise;
-  private scale = 0.1;
-  private amplitude = 20;
+  private scale = 0.05;
+  private amplitude = 8;
   private baseHeight = 20;
+  private chunkCache = new Map<string, Chunk>();
+  private maxCacheSize = 100; // Limit cache size to prevent memory issues
 
   constructor(seed = 42) {
     this.noise = new SimplexNoise(seed);
   }
 
+  private getChunkKey(chunkX: number, chunkZ: number): string {
+    return `${chunkX},${chunkZ}`;
+  }
+
   generateChunk(chunkX: number, chunkZ: number): Chunk {
+    const key = this.getChunkKey(chunkX, chunkZ);
+
+    // Check cache first
+    if (this.chunkCache.has(key)) {
+      return this.chunkCache.get(key)!;
+    }
+
     const blocks: Block[][][] = [];
 
     // Initialize 3D array
@@ -76,34 +89,37 @@ export class TerrainGenerator {
       blocks,
     };
 
-    console.log(`Generated chunk ${chunkX},${chunkZ}`);
+    // Cache the chunk with LRU eviction
+    if (this.chunkCache.size >= this.maxCacheSize) {
+      // Remove oldest entry (first key)
+      const firstKey = this.chunkCache.keys().next().value;
+      if (firstKey) {
+        this.chunkCache.delete(firstKey);
+      }
+    }
+
+    this.chunkCache.set(key, chunk);
     return chunk;
   }
 
   getBlocksForRendering(chunk: Chunk): Block[] {
     const renderBlocks: Block[] = [];
-    let totalBlocks = 0;
-    let airBlocks = 0;
 
     for (let x = 0; x < CHUNK_SIZE; x++) {
       for (let y = 0; y < WORLD_HEIGHT; y++) {
         for (let z = 0; z < CHUNK_SIZE; z++) {
           const block = chunk.blocks[x][y][z];
-          totalBlocks++;
 
-          if (block.type === BlockType.AIR) {
-            airBlocks++;
-          } else {
-            // For now, render all non-air blocks to debug
-            renderBlocks.push(block);
+          if (block.type !== BlockType.AIR) {
+            // Only render blocks that have at least one exposed face
+            if (this.shouldRenderBlock(chunk, x, y, z)) {
+              renderBlocks.push(block);
+            }
           }
         }
       }
     }
 
-    console.log(
-      `Chunk ${chunk.x},${chunk.z}: ${totalBlocks} total, ${airBlocks} air, ${renderBlocks.length} rendered`,
-    );
     return renderBlocks;
   }
 

@@ -18,12 +18,6 @@ export default function World() {
 
   return (
     <group>
-      {/* Test cube to verify rendering works */}
-      <mesh position={[0, 10, 0]}>
-        <boxGeometry args={[2, 2, 2]} />
-        <meshLambertMaterial color="red" />
-      </mesh>
-
       {chunks.map(({ x, z }) => (
         <Terrain key={`${x}-${z}`} chunkX={x} chunkZ={z} />
       ))}
