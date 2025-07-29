@@ -35,7 +35,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
 
     if (grassInstancedMeshRef.current) {
       grassBlocks.forEach((block, i) => {
-        matrix.setPosition(block.x, block.y, block.z);
+        matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
         grassInstancedMeshRef.current?.setMatrixAt(i, matrix);
       });
       grassInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -43,7 +43,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
 
     if (dirtInstancedMeshRef.current) {
       dirtBlocks.forEach((block, i) => {
-        matrix.setPosition(block.x, block.y, block.z);
+        matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
         dirtInstancedMeshRef.current?.setMatrixAt(i, matrix);
       });
       dirtInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -51,7 +51,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
 
     if (stoneInstancedMeshRef.current) {
       stoneBlocks.forEach((block, i) => {
-        matrix.setPosition(block.x, block.y, block.z);
+        matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
         stoneInstancedMeshRef.current?.setMatrixAt(i, matrix);
       });
       stoneInstancedMeshRef.current.instanceMatrix.needsUpdate = true;

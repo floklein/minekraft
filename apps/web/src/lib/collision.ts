@@ -67,12 +67,15 @@ export class CollisionSystem {
   getCollidingBlocks(aabb: AABB): { x: number; y: number; z: number }[] {
     const blocks: { x: number; y: number; z: number }[] = [];
 
+    // To ensure symmetric collision detection, we need to properly handle block boundaries
+    // We shrink the AABB by a tiny amount to avoid floating point edge cases
+    const epsilon = 0.0001;
     const minBlockX = Math.floor(aabb.minX);
-    const maxBlockX = Math.floor(aabb.maxX);
+    const maxBlockX = Math.floor(aabb.maxX - epsilon);
     const minBlockY = Math.floor(aabb.minY);
-    const maxBlockY = Math.floor(aabb.maxY);
+    const maxBlockY = Math.floor(aabb.maxY - epsilon);
     const minBlockZ = Math.floor(aabb.minZ);
-    const maxBlockZ = Math.floor(aabb.maxZ);
+    const maxBlockZ = Math.floor(aabb.maxZ - epsilon);
 
     for (let x = minBlockX; x <= maxBlockX; x++) {
       for (let y = minBlockY; y <= maxBlockY; y++) {
