@@ -66,6 +66,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           args={[undefined, undefined, grassBlocks.length]}
           castShadow={false}
           receiveShadow={false}
+          frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
           <meshLambertMaterial map={getBlockTexture(BlockType.GRASS)} />
@@ -78,6 +79,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           args={[undefined, undefined, dirtBlocks.length]}
           castShadow={false}
           receiveShadow={false}
+          frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
           <meshLambertMaterial map={getBlockTexture(BlockType.DIRT)} />
@@ -90,6 +92,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           args={[undefined, undefined, stoneBlocks.length]}
           castShadow={false}
           receiveShadow={false}
+          frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
           <meshLambertMaterial map={getBlockTexture(BlockType.STONE)} />
