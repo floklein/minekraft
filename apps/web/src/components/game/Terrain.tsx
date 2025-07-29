@@ -1,6 +1,7 @@
-import { useMemo } from "react";
-import { createBlockMaterial } from "@/lib/blocks";
-import { useTerrain } from "./TerrainContext";
+import { useEffect, useMemo, useRef } from "react";
+import * as THREE from "three";
+import { BlockType, getBlockTexture } from "@/lib/blocks";
+import { useGameStore } from "@/lib/store";
 
 interface TerrainProps {
   chunkX: number;
@@ -8,26 +9,92 @@ interface TerrainProps {
 }
 
 export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
-  const terrain = useTerrain();
+  const terrain = useGameStore((state) => state.terrain);
+  const grassInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
+  const dirtInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
+  const stoneInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
 
-  const blocks = useMemo(() => {
+  const { grassBlocks, dirtBlocks, stoneBlocks } = useMemo(() => {
     const chunk = terrain.generateChunk(chunkX, chunkZ);
-    return terrain.getBlocksForRendering(chunk);
+    const blocks = terrain.getBlocksForRendering(chunk);
+
+    const grassBlocks = blocks.filter(
+      (block) => block.type === BlockType.GRASS,
+    );
+    const dirtBlocks = blocks.filter((block) => block.type === BlockType.DIRT);
+    const stoneBlocks = blocks.filter(
+      (block) => block.type === BlockType.STONE,
+    );
+
+    return { grassBlocks, dirtBlocks, stoneBlocks };
   }, [chunkX, chunkZ, terrain]);
+
+  // Update instanced mesh positions only when blocks change
+  useEffect(() => {
+    const matrix = new THREE.Matrix4();
+
+    if (grassInstancedMeshRef.current) {
+      grassBlocks.forEach((block, i) => {
+        matrix.setPosition(block.x, block.y, block.z);
+        grassInstancedMeshRef.current?.setMatrixAt(i, matrix);
+      });
+      grassInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    if (dirtInstancedMeshRef.current) {
+      dirtBlocks.forEach((block, i) => {
+        matrix.setPosition(block.x, block.y, block.z);
+        dirtInstancedMeshRef.current?.setMatrixAt(i, matrix);
+      });
+      dirtInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
+    }
+
+    if (stoneInstancedMeshRef.current) {
+      stoneBlocks.forEach((block, i) => {
+        matrix.setPosition(block.x, block.y, block.z);
+        stoneInstancedMeshRef.current?.setMatrixAt(i, matrix);
+      });
+      stoneInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
+    }
+  }, [grassBlocks, dirtBlocks, stoneBlocks]);
 
   return (
     <group>
-      {blocks.map((block) => (
-        <mesh
-          key={`${block.x}-${block.y}-${block.z}`}
-          position={[block.x, block.y, block.z]}
+      {grassBlocks.length > 0 && (
+        <instancedMesh
+          ref={grassInstancedMeshRef}
+          args={[undefined, undefined, grassBlocks.length]}
           castShadow={false}
           receiveShadow={false}
         >
           <boxGeometry args={[1, 1, 1]} />
-          <primitive object={createBlockMaterial(block.type)} />
-        </mesh>
-      ))}
+          <meshLambertMaterial map={getBlockTexture(BlockType.GRASS)} />
+        </instancedMesh>
+      )}
+
+      {dirtBlocks.length > 0 && (
+        <instancedMesh
+          ref={dirtInstancedMeshRef}
+          args={[undefined, undefined, dirtBlocks.length]}
+          castShadow={false}
+          receiveShadow={false}
+        >
+          <boxGeometry args={[1, 1, 1]} />
+          <meshLambertMaterial map={getBlockTexture(BlockType.DIRT)} />
+        </instancedMesh>
+      )}
+
+      {stoneBlocks.length > 0 && (
+        <instancedMesh
+          ref={stoneInstancedMeshRef}
+          args={[undefined, undefined, stoneBlocks.length]}
+          castShadow={false}
+          receiveShadow={false}
+        >
+          <boxGeometry args={[1, 1, 1]} />
+          <meshLambertMaterial map={getBlockTexture(BlockType.STONE)} />
+        </instancedMesh>
+      )}
     </group>
   );
 }

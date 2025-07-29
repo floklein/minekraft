@@ -1,25 +1,70 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useGameStore } from "@/lib/store";
 import Terrain from "./Terrain";
 
+interface ChunkData {
+  x: number;
+  z: number;
+  key: string;
+}
+
 export default function World() {
-  // Generate a 3x3 grid of chunks centered around origin
-  const chunks = useMemo(() => {
-    const chunkList = [];
-    const renderDistance = 1; // How many chunks in each direction
+  const playerChunkX = useGameStore((state) => state.playerChunkX);
+  const playerChunkZ = useGameStore((state) => state.playerChunkZ);
+  const [loadedChunks, setLoadedChunks] = useState<Map<string, ChunkData>>(
+    new Map(),
+  );
 
-    for (let x = -renderDistance; x <= renderDistance; x++) {
-      for (let z = -renderDistance; z <= renderDistance; z++) {
-        chunkList.push({ x, z });
+  // Update loaded chunks when player moves
+  useEffect(() => {
+    const renderDistance = 1; // Reduced render distance for better performance
+    const unloadDistance = 2; // Unload chunks further away
+
+    setLoadedChunks((prev) => {
+      const newChunks = new Map(prev);
+
+      // Add new chunks that should be loaded
+      for (
+        let x = playerChunkX - renderDistance;
+        x <= playerChunkX + renderDistance;
+        x++
+      ) {
+        for (
+          let z = playerChunkZ - renderDistance;
+          z <= playerChunkZ + renderDistance;
+          z++
+        ) {
+          const key = `${x}-${z}`;
+          if (!newChunks.has(key)) {
+            newChunks.set(key, { x, z, key });
+          }
+        }
       }
-    }
 
-    return chunkList;
-  }, []);
+      // Remove chunks that are too far away
+      for (const [key, chunk] of newChunks) {
+        const distance = Math.max(
+          Math.abs(chunk.x - playerChunkX),
+          Math.abs(chunk.z - playerChunkZ),
+        );
+        if (distance > unloadDistance) {
+          newChunks.delete(key);
+        }
+      }
+
+      return newChunks;
+    });
+  }, [playerChunkX, playerChunkZ]);
+
+  const chunksArray = useMemo(
+    () => Array.from(loadedChunks.values()),
+    [loadedChunks],
+  );
 
   return (
     <group>
-      {chunks.map(({ x, z }) => (
-        <Terrain key={`${x}-${z}`} chunkX={x} chunkZ={z} />
+      {chunksArray.map(({ x, z, key }) => (
+        <Terrain key={key} chunkX={x} chunkZ={z} />
       ))}
     </group>
   );

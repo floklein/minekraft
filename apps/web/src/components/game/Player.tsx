@@ -3,8 +3,9 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import type { PointerLockControls as PointerLockControlsType } from "three-stdlib";
+import { CHUNK_SIZE } from "@/lib/blocks";
 import { PLAYER_EYE_HEIGHT } from "@/lib/collision";
-import { useCollision } from "./TerrainContext";
+import { useGameStore } from "@/lib/store";
 
 const MOVEMENT_SPEED = 5;
 const JUMP_FORCE = 8;
@@ -12,10 +13,12 @@ const GRAVITY = -20;
 
 export default function Player() {
   const { camera } = useThree();
-  const collision = useCollision();
+  const collision = useGameStore((state) => state.collision);
+  const setPlayerPosition = useGameStore((state) => state.setPlayerPosition);
   const controlsRef = useRef<PointerLockControlsType | null>(null);
   const velocityRef = useRef(new THREE.Vector3(0, 0, 0));
   const playerPositionRef = useRef(new THREE.Vector3(0, 0, 0)); // Player feet position
+  const lastReportedChunkRef = useRef({ x: 0, z: 0 });
   const initializedRef = useRef(false);
   const isGroundedRef = useRef(false);
   const keysRef = useRef({
@@ -165,6 +168,16 @@ export default function Player() {
 
     // Update player position (feet)
     playerPosition.set(result.x, result.y, result.z);
+
+    // Only update global player position if we moved to a different chunk
+    const currentChunkX = Math.floor(result.x / CHUNK_SIZE);
+    const currentChunkZ = Math.floor(result.z / CHUNK_SIZE);
+    const lastChunk = lastReportedChunkRef.current;
+
+    if (currentChunkX !== lastChunk.x || currentChunkZ !== lastChunk.z) {
+      setPlayerPosition(playerPosition.clone());
+      lastReportedChunkRef.current = { x: currentChunkX, z: currentChunkZ };
+    }
 
     // Update camera position (eyes)
     camera.position.set(result.x, result.y + PLAYER_EYE_HEIGHT, result.z);
