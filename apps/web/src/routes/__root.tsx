@@ -5,8 +5,6 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import Header from "@/components/header";
-import Loader from "@/components/loader";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import "../index.css";
@@ -40,19 +38,18 @@ function RootComponent() {
   return (
     <>
       <HeadContent />
-      <ThemeProvider
-        attribute="class"
-        defaultTheme="dark"
-        disableTransitionOnChange
-        storageKey="vite-ui-theme"
-      >
-        <div className="grid h-svh grid-rows-[auto_1fr]">
-          <Header />
-          {isFetching ? <Loader /> : <Outlet />}
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <div className="flex h-screen w-screen flex-col">
+          {isFetching && (
+            <div className="fixed top-0 left-0 z-50 h-1 w-full">
+              <div className="h-full animate-pulse bg-primary" />
+            </div>
+          )}
+          <Outlet />
         </div>
-        <Toaster richColors />
+        <Toaster />
       </ThemeProvider>
-      <TanStackRouterDevtools position="bottom-left" />
+      <TanStackRouterDevtools />
     </>
   );
 }
