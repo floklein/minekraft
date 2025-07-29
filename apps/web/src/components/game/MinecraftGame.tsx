@@ -58,8 +58,7 @@ export default function MinecraftGame() {
         <Stats className="!bottom-0 !top-auto !right-0 !left-auto" />
       </Canvas>
 
-      <div className="absolute top-4 left-4 border-2 border-gray-800 bg-gray-900/90 p-3 text-white shadow-lg">
-        <h3 className="mb-2 font-bold text-gray-300 text-sm">Controls</h3>
+      <div className="absolute top-4 left-4 border-4 border-gray-500 bg-gray-700/80 p-3 text-white backdrop-blur-sm">
         <div className="space-y-1 text-xs">
           <p>
             <span className="text-yellow-400">WASD</span> - Move
@@ -74,8 +73,7 @@ export default function MinecraftGame() {
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 border-2 border-gray-800 bg-gray-900/90 p-3 text-white shadow-lg">
-        <h3 className="mb-2 font-bold text-gray-300 text-sm">Position</h3>
+      <div className="absolute top-4 right-4 border-4 border-gray-500 bg-gray-700/80 p-3 text-white backdrop-blur-sm">
         <div className="space-y-1 font-mono text-xs">
           <p>
             X:{" "}
