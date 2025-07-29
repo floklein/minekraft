@@ -23,7 +23,7 @@ export default function InventoryBar() {
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
       const key = Number.parseInt(e.key);
-      if (!isNaN(key) && key >= 1 && key <= items.length) {
+      if (!Number.isNaN(key) && key >= 1 && key <= items.length) {
         setSelectedSlot(key - 1);
       }
     };

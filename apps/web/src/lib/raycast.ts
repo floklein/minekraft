@@ -11,11 +11,9 @@ interface RaycastResult {
 }
 
 export class RaycastHelper {
-  private raycaster: THREE.Raycaster;
   private terrain: TerrainGenerator;
 
   constructor(terrain: TerrainGenerator) {
-    this.raycaster = new THREE.Raycaster();
     this.terrain = terrain;
   }
 

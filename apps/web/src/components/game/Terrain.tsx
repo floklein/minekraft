@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { BlockType, getBlockTexture } from "@/lib/blocks";
+import { type Block, BlockType, getBlockTexture } from "@/lib/blocks";
 import { useGameStore } from "@/lib/store";
 
 interface TerrainProps {
@@ -10,32 +10,47 @@ interface TerrainProps {
 
 export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
   const terrain = useGameStore((state) => state.terrain);
+  const [blockGroups, setBlockGroups] = useState<{
+    grassBlocks: Block[];
+    dirtBlocks: Block[];
+    stoneBlocks: Block[];
+  }>({
+    grassBlocks: [],
+    dirtBlocks: [],
+    stoneBlocks: [],
+  });
+
   const grassInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const dirtInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const stoneInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
-  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    const updateBlocks = () => {
+      const chunk = terrain.generateChunk(chunkX, chunkZ);
+      const blocks = terrain.getBlocksForRendering(chunk);
+      setBlockGroups({
+        grassBlocks: blocks.filter((block) => block.type === BlockType.GRASS),
+        dirtBlocks: blocks.filter((block) => block.type === BlockType.DIRT),
+        stoneBlocks: blocks.filter((block) => block.type === BlockType.STONE),
+      });
+    };
+    updateBlocks();
+  }, [chunkX, chunkZ, terrain]);
 
   useEffect(() => {
     const unsubscribe = terrain.onBlockChange(() => {
-      setUpdateTrigger((prev) => prev + 1);
+      const chunk = terrain.generateChunk(chunkX, chunkZ);
+      const blocks = terrain.getBlocksForRendering(chunk);
+      setBlockGroups({
+        grassBlocks: blocks.filter((block) => block.type === BlockType.GRASS),
+        dirtBlocks: blocks.filter((block) => block.type === BlockType.DIRT),
+        stoneBlocks: blocks.filter((block) => block.type === BlockType.STONE),
+      });
     });
     return unsubscribe;
-  }, [terrain]);
+  }, [terrain, chunkX, chunkZ]);
 
-  const { grassBlocks, dirtBlocks, stoneBlocks } = useMemo(() => {
-    const chunk = terrain.generateChunk(chunkX, chunkZ);
-    const blocks = terrain.getBlocksForRendering(chunk);
-
-    const grassBlocks = blocks.filter(
-      (block) => block.type === BlockType.GRASS,
-    );
-    const dirtBlocks = blocks.filter((block) => block.type === BlockType.DIRT);
-    const stoneBlocks = blocks.filter(
-      (block) => block.type === BlockType.STONE,
-    );
-
-    return { grassBlocks, dirtBlocks, stoneBlocks };
-  }, [chunkX, chunkZ, terrain, updateTrigger]);
+  const { grassBlocks, dirtBlocks, stoneBlocks } = blockGroups;
 
   // Update instanced mesh positions only when blocks change
   useEffect(() => {
