@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { BlockType, getBlockTexture } from "@/lib/blocks";
 import { useGameStore } from "@/lib/store";
@@ -13,6 +13,14 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
   const grassInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const dirtInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
   const stoneInstancedMeshRef = useRef<THREE.InstancedMesh>(null);
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = terrain.onBlockChange(() => {
+      setUpdateTrigger((prev) => prev + 1);
+    });
+    return unsubscribe;
+  }, [terrain]);
 
   const { grassBlocks, dirtBlocks, stoneBlocks } = useMemo(() => {
     const chunk = terrain.generateChunk(chunkX, chunkZ);
@@ -27,7 +35,7 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
     );
 
     return { grassBlocks, dirtBlocks, stoneBlocks };
-  }, [chunkX, chunkZ, terrain]);
+  }, [chunkX, chunkZ, terrain, updateTrigger]);
 
   // Update instanced mesh positions only when blocks change
   useEffect(() => {

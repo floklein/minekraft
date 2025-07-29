@@ -14,6 +14,8 @@ export class TerrainGenerator {
   private baseHeight = 20;
   private chunkCache = new Map<string, Chunk>();
   private maxCacheSize = 100; // Limit cache size to prevent memory issues
+  private blockChanges = new Map<string, BlockType>();
+  private changeCallbacks = new Set<() => void>();
 
   constructor(seed = 42) {
     this.noise = new SimplexNoise(seed);
@@ -81,6 +83,21 @@ export class TerrainGenerator {
           } else {
             // Everything else is stone
             blocks[x][y][z].type = BlockType.STONE;
+          }
+        }
+      }
+    }
+
+    // Apply block changes
+    for (let x = 0; x < CHUNK_SIZE; x++) {
+      for (let y = 0; y < WORLD_HEIGHT; y++) {
+        for (let z = 0; z < CHUNK_SIZE; z++) {
+          const worldX = chunkX * CHUNK_SIZE + x;
+          const worldZ = chunkZ * CHUNK_SIZE + z;
+          const modifiedBlock = this.getModifiedBlock(worldX, y, worldZ);
+
+          if (modifiedBlock !== null) {
+            blocks[x][y][z].type = modifiedBlock;
           }
         }
       }
@@ -210,5 +227,46 @@ export class TerrainGenerator {
     const block = chunk.blocks[localX][blockY][localZ];
 
     return block.type !== BlockType.AIR;
+  }
+
+  private getBlockKey(x: number, y: number, z: number): string {
+    return `${x},${y},${z}`;
+  }
+
+  setBlock(x: number, y: number, z: number, blockType: BlockType): void {
+    const key = this.getBlockKey(x, y, z);
+
+    if (blockType === BlockType.AIR) {
+      this.blockChanges.delete(key);
+    } else {
+      this.blockChanges.set(key, blockType);
+    }
+
+    const chunkX = Math.floor(x / CHUNK_SIZE);
+    const chunkZ = Math.floor(z / CHUNK_SIZE);
+    const chunkKey = this.getChunkKey(chunkX, chunkZ);
+    this.chunkCache.delete(chunkKey);
+
+    this.notifyChanges();
+  }
+
+  removeBlock(x: number, y: number, z: number): void {
+    this.setBlock(x, y, z, BlockType.AIR);
+  }
+
+  getModifiedBlock(x: number, y: number, z: number): BlockType | null {
+    const key = this.getBlockKey(x, y, z);
+    return this.blockChanges.get(key) ?? null;
+  }
+
+  onBlockChange(callback: () => void): () => void {
+    this.changeCallbacks.add(callback);
+    return () => {
+      this.changeCallbacks.delete(callback);
+    };
+  }
+
+  private notifyChanges(): void {
+    this.changeCallbacks.forEach((callback) => callback());
   }
 }

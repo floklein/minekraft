@@ -3,6 +3,9 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useState } from "react";
 import * as THREE from "three";
 import { PLAYER_EYE_HEIGHT } from "@/lib/collision";
+import BlockInteraction from "./BlockInteraction";
+import Crosshair from "./Crosshair";
+import InventoryBar from "./InventoryBar";
 import Player from "./Player";
 import World from "./World";
 
@@ -49,6 +52,7 @@ export default function MinecraftGame() {
 
         <Player />
         <World />
+        <BlockInteraction />
         <PlayerCoordinates onCoordsUpdate={setPlayerCoords} />
 
         <Stats className="!bottom-0 !top-auto !right-0 !left-auto" />
@@ -87,6 +91,9 @@ export default function MinecraftGame() {
           </p>
         </div>
       </div>
+
+      <Crosshair />
+      <InventoryBar />
     </div>
   );
 }
