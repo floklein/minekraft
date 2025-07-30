@@ -27,7 +27,14 @@ export default function MinecraftGame() {
           position={[50, 50, 50]}
           intensity={1}
           castShadow
-          shadow-mapSize={[2048, 2048]}
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-left={-100}
+          shadow-camera-right={100}
+          shadow-camera-top={100}
+          shadow-camera-bottom={-100}
+          shadow-camera-near={1}
+          shadow-camera-far={400}
+          shadow-bias={-0.001}
         />
 
         <Player />

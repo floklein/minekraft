@@ -85,8 +85,8 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
         <instancedMesh
           ref={grassInstancedMeshRef}
           args={[undefined, undefined, grassBlocks.length]}
-          castShadow={false}
-          receiveShadow={false}
+          castShadow={true}
+          receiveShadow={true}
           frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
@@ -97,8 +97,8 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
         <instancedMesh
           ref={dirtInstancedMeshRef}
           args={[undefined, undefined, dirtBlocks.length]}
-          castShadow={false}
-          receiveShadow={false}
+          castShadow={true}
+          receiveShadow={true}
           frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
@@ -109,8 +109,8 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
         <instancedMesh
           ref={stoneInstancedMeshRef}
           args={[undefined, undefined, stoneBlocks.length]}
-          castShadow={false}
-          receiveShadow={false}
+          castShadow={true}
+          receiveShadow={true}
           frustumCulled={false}
         >
           <boxGeometry args={[1, 1, 1]} />
