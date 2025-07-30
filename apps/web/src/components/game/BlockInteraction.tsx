@@ -1,6 +1,7 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
+import { PLAYER_EYE_HEIGHT } from "@/lib/collision";
 import { RaycastHelper } from "@/lib/raycast";
 import { useGameStore } from "@/zustand/game";
 import { useInventoryStore } from "@/zustand/inventory";
@@ -9,6 +10,7 @@ export default function BlockInteraction() {
   const { camera } = useThree();
 
   const terrain = useGameStore((state) => state.terrain);
+  const collision = useGameStore((state) => state.collision);
   const selectedBlock = useInventoryStore((state) => state.selectedBlock);
 
   const raycastHelper = useRef(new RaycastHelper(terrain));
@@ -27,12 +29,29 @@ export default function BlockInteraction() {
             result.blockPosition.z,
           );
         } else if (event.button === 2) {
-          terrain.setBlock(
+          const playerFeetPosition = new THREE.Vector3(
+            camera.position.x,
+            camera.position.y - PLAYER_EYE_HEIGHT,
+            camera.position.z,
+          );
+          const blockAABB = collision.createBlockAABB(
             result.adjacentBlockPosition.x,
             result.adjacentBlockPosition.y,
             result.adjacentBlockPosition.z,
-            selectedBlock,
           );
+          const playerAABB = collision.createPlayerAABB(
+            playerFeetPosition.x,
+            playerFeetPosition.y,
+            playerFeetPosition.z,
+          );
+          if (!collision.aabbIntersects(blockAABB, playerAABB)) {
+            terrain.setBlock(
+              result.adjacentBlockPosition.x,
+              result.adjacentBlockPosition.y,
+              result.adjacentBlockPosition.z,
+              selectedBlock,
+            );
+          }
         }
       }
     };
@@ -45,7 +64,7 @@ export default function BlockInteraction() {
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("contextmenu", handleContextMenu);
     };
-  }, [camera, terrain, selectedBlock]);
+  }, [camera, terrain, collision, selectedBlock]);
 
   return null;
 }
