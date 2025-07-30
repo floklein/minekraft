@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { type Block, BlockType, getBlockTexture } from "@/lib/blocks";
-import { useGameStore } from "@/lib/store";
+import { useGameStore } from "@/zustand/game";
 
 interface TerrainProps {
   chunkX: number;
@@ -10,6 +10,7 @@ interface TerrainProps {
 
 export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
   const terrain = useGameStore((state) => state.terrain);
+
   const [blockGroups, setBlockGroups] = useState<{
     grassBlocks: Block[];
     dirtBlocks: Block[];
@@ -55,7 +56,6 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
   // Update instanced mesh positions only when blocks change
   useEffect(() => {
     const matrix = new THREE.Matrix4();
-
     if (grassInstancedMeshRef.current) {
       grassBlocks.forEach((block, i) => {
         matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
@@ -63,7 +63,6 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
       });
       grassInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
-
     if (dirtInstancedMeshRef.current) {
       dirtBlocks.forEach((block, i) => {
         matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
@@ -71,7 +70,6 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
       });
       dirtInstancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
-
     if (stoneInstancedMeshRef.current) {
       stoneBlocks.forEach((block, i) => {
         matrix.setPosition(block.x + 0.5, block.y + 0.5, block.z + 0.5);
@@ -95,7 +93,6 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           <meshLambertMaterial map={getBlockTexture(BlockType.GRASS)} />
         </instancedMesh>
       )}
-
       {dirtBlocks.length > 0 && (
         <instancedMesh
           ref={dirtInstancedMeshRef}
@@ -108,7 +105,6 @@ export default function Terrain({ chunkX, chunkZ }: TerrainProps) {
           <meshLambertMaterial map={getBlockTexture(BlockType.DIRT)} />
         </instancedMesh>
       )}
-
       {stoneBlocks.length > 0 && (
         <instancedMesh
           ref={stoneInstancedMeshRef}

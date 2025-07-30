@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useGameStore } from "@/lib/store";
+import { useGameStore } from "@/zustand/game";
 import Terrain from "./Terrain";
 
 interface ChunkData {
@@ -11,6 +11,7 @@ interface ChunkData {
 export default function World() {
   const playerChunkX = useGameStore((state) => state.playerChunkX);
   const playerChunkZ = useGameStore((state) => state.playerChunkZ);
+
   const [loadedChunks, setLoadedChunks] = useState<Map<string, ChunkData>>(
     new Map(),
   );
@@ -19,10 +20,8 @@ export default function World() {
   useEffect(() => {
     const renderDistance = 1; // Reduced render distance for better performance
     const unloadDistance = 2; // Unload chunks further away
-
     setLoadedChunks((prev) => {
       const newChunks = new Map(prev);
-
       // Add new chunks that should be loaded
       for (
         let x = playerChunkX - renderDistance;
@@ -40,7 +39,6 @@ export default function World() {
           }
         }
       }
-
       // Remove chunks that are too far away
       for (const [key, chunk] of newChunks) {
         const distance = Math.max(
@@ -51,7 +49,6 @@ export default function World() {
           newChunks.delete(key);
         }
       }
-
       return newChunks;
     });
   }, [playerChunkX, playerChunkZ]);

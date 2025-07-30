@@ -1,35 +1,15 @@
 import { Stats } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useState } from "react";
+import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
-import { PLAYER_EYE_HEIGHT } from "@/lib/collision";
+import AOEffects from "./AOEffects";
 import BlockInteraction from "./BlockInteraction";
 import Crosshair from "./Crosshair";
 import InventoryBar from "./InventoryBar";
 import Player from "./Player";
+import PlayerCoordinates, { GetPlayerCoordinates } from "./PlayerCoordinates";
 import World from "./World";
 
-function PlayerCoordinates({
-  onCoordsUpdate,
-}: {
-  onCoordsUpdate: (coords: { x: number; y: number; z: number }) => void;
-}) {
-  const { camera } = useThree();
-
-  useFrame(() => {
-    onCoordsUpdate({
-      x: camera.position.x,
-      y: camera.position.y - PLAYER_EYE_HEIGHT,
-      z: camera.position.z,
-    });
-  });
-
-  return null;
-}
-
 export default function MinecraftGame() {
-  const [playerCoords, setPlayerCoords] = useState({ x: 0, y: 0, z: 0 });
-
   return (
     <div className="relative h-full w-full">
       <Canvas
@@ -53,7 +33,8 @@ export default function MinecraftGame() {
         <Player />
         <World />
         <BlockInteraction />
-        <PlayerCoordinates onCoordsUpdate={setPlayerCoords} />
+        <AOEffects />
+        <GetPlayerCoordinates />
 
         <Stats className="!bottom-0 !top-auto !right-0 !left-auto" />
       </Canvas>
@@ -73,23 +54,7 @@ export default function MinecraftGame() {
         </div>
       </div>
 
-      <div className="absolute top-4 right-4 border-4 border-gray-500 bg-gray-700/80 p-3 text-white backdrop-blur-sm">
-        <div className="space-y-1 font-mono text-xs">
-          <p>
-            X:{" "}
-            <span className="text-cyan-400">{playerCoords.x.toFixed(1)}</span>
-          </p>
-          <p>
-            Y:{" "}
-            <span className="text-cyan-400">{playerCoords.y.toFixed(1)}</span>
-          </p>
-          <p>
-            Z:{" "}
-            <span className="text-cyan-400">{playerCoords.z.toFixed(1)}</span>
-          </p>
-        </div>
-      </div>
-
+      <PlayerCoordinates />
       <Crosshair />
       <InventoryBar />
     </div>

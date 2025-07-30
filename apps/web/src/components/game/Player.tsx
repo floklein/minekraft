@@ -5,7 +5,7 @@ import * as THREE from "three";
 import type { PointerLockControls as PointerLockControlsType } from "three-stdlib";
 import { CHUNK_SIZE } from "@/lib/blocks";
 import { PLAYER_EYE_HEIGHT } from "@/lib/collision";
-import { useGameStore } from "@/lib/store";
+import { useGameStore } from "@/zustand/game";
 
 const MOVEMENT_SPEED = 5;
 const JUMP_FORCE = 8;
@@ -13,8 +13,10 @@ const GRAVITY = -20;
 
 export default function Player() {
   const { camera } = useThree();
+
   const collision = useGameStore((state) => state.collision);
   const setPlayerPosition = useGameStore((state) => state.setPlayerPosition);
+
   const controlsRef = useRef<PointerLockControlsType | null>(null);
   const velocityRef = useRef(new THREE.Vector3(0, 0, 0));
   const playerPositionRef = useRef(new THREE.Vector3(0, 0, 0)); // Player feet position

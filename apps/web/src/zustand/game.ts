@@ -14,6 +14,8 @@ interface GameStore {
   playerChunkX: number;
   playerChunkZ: number;
   setPlayerPosition: (position: THREE.Vector3) => void;
+  playerCoords: { x: string; y: string; z: string };
+  setPlayerCoords: (coords: { x: string; y: string; z: string }) => void;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -22,13 +24,17 @@ export const useGameStore = create<GameStore>((set) => ({
   playerPosition: new THREE.Vector3(0, 0, 0),
   playerChunkX: 0,
   playerChunkZ: 0,
-  setPlayerPosition: (position: THREE.Vector3) => {
-    const chunkX = Math.floor(position.x / CHUNK_SIZE);
-    const chunkZ = Math.floor(position.z / CHUNK_SIZE);
+  playerCoords: { x: "0", y: "0", z: "0" },
+  setPlayerPosition: (playerPosition: THREE.Vector3) => {
+    const chunkX = Math.floor(playerPosition.x / CHUNK_SIZE);
+    const chunkZ = Math.floor(playerPosition.z / CHUNK_SIZE);
     set({
-      playerPosition: position,
+      playerPosition,
       playerChunkX: chunkX,
       playerChunkZ: chunkZ,
     });
+  },
+  setPlayerCoords: (playerCoords: { x: string; y: string; z: string }) => {
+    set({ playerCoords });
   },
 }));

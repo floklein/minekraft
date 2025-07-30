@@ -3,8 +3,8 @@ import defaultDirt from "@/assets/default_dirt.png";
 import defaultGrass from "@/assets/default_grass.png";
 import defaultStone from "@/assets/default_stone.png";
 import { BlockType } from "@/lib/blocks";
-import { useInventoryStore } from "@/lib/inventory-store";
 import { cn } from "@/lib/utils";
+import { useInventoryStore } from "@/zustand/inventory";
 
 const blockImages: Record<BlockType, string> = {
   [BlockType.AIR]: "",
@@ -21,7 +21,9 @@ const blockNames: Record<BlockType, string> = {
 };
 
 export default function InventoryBar() {
-  const { items, selectedSlot, setSelectedSlot } = useInventoryStore();
+  const items = useInventoryStore((state) => state.items);
+  const selectedSlot = useInventoryStore((state) => state.selectedSlot);
+  const setSelectedSlot = useInventoryStore((state) => state.setSelectedSlot);
 
   useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -30,7 +32,6 @@ export default function InventoryBar() {
         setSelectedSlot(key - 1);
       }
     };
-
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [items.length, setSelectedSlot]);
